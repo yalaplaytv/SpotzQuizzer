@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spots Quizzer</title>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-1GB1C1JTZ2"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-1GB1C1JTZ2');
+    </script>
+    <style>
+        /* Basic page styling */
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-image: url('https://i.imgur.com/gVqgKJ5.jpg'); /* Your image URL */
+            background-size: cover; /* Ensures the image covers the entire screen */
+            background-position: center; /* Centers the image */
+            background-repeat: no-repeat; /* Prevents the image from repeating */
+            background-attachment: fixed; /* Keeps the background fixed while scrolling */
+            color: #333;
+            position: relative;
+            min-height: 100vh; /* Ensures the body takes up at least the full viewport height */
+        }
+
+        /* Add an overlay to make text more readable */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.3); /* Semi-transparent white overlay */
+            z-index: -1;
+        }
+
+        h1 {
+            margin-top: 20px;
+            font-size: 2em;
+            color: #0056b3;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+            background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent white background */
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .image-container {
+            width: 100%;
+            max-width: 500px;
+            height: 300px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            border: 2px solid #ddd;
+            margin: 20px 0;
+            background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent white background */
+        }
+
+        .image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .controls, .answer-box {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 10px;
+        }
+
+        .button, .timer, .answer-box button {
+            padding: 10px;
+            margin: 5px;
+            font-size: 1em;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #1abc9c; /* Teal color for buttons */
+            color: white;
+            transition: background-color 0.3s ease;
+        }
+
+        .button:hover, .answer-box button:hover {
+            background-color: #16a085; /* Darker teal on hover */
+        }
+
+        .timer {
+            font-weight: bold;
+            color: #333;
+            background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent white background */
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .answer-box button {
+            background-color: #e67e22; /* Orange color for answer buttons */
+        }
+
+        .answer-box button:hover {
+            background-color: #d35400; /* Darker orange on hover */
+        }
+
+        .result-symbol {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: green;
+        }
+
+        .no-symbol {
+            color: red;
+        }
+
+        .results {
+            margin-top: 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+            background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent white background */
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .footer {
+            margin-top: 30px;
+            font-size: 0.9em;
+            color: #666;
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent white background */
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .info-button {
+            background-color: #f1f1f1;
+            padding: 8px;
+            border: none;
+            cursor: pointer;
+            color: #333;
+            margin-top: 10px;
+        }
+
+        /* Dropdown styling */
+        .dropdown {
+            padding: 8px;
+            font-size: 1em;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Visitor counter styling */
+        .visitor-counter {
+            margin-top: 10px;
+            font-size: 1em;
+            color: #333;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Spots Quizzer</h1>
+    
+    <input type="file" id="file-input" accept="image/*" multiple>
+    
+    <div class="image-container">
+        <img id="quiz-image" src="" alt="Quiz Image" style="display: none;">
+    </div>
+    
+    <div class="controls">
+        <button class="button" id="prev-btn">Previous</button>
+        <button class="button" id="next-btn">Next</button>
+        <button class="button" id="restart-btn">Restart Quiz</button>
+    </div>
+    
+    <div class="controls">
+        <label for="timer-select">Set Timer:</label>
+        <select id="timer-select" class="dropdown">
+            <option value="5">5 seconds</option>
+            <option value="10" selected>10 seconds</option> <!-- Default selection -->
+            <option value="20">20 seconds</option>
+            <option value="30">30 seconds</option>
+            <option value="60">60 seconds</option>
+            <option value="120">2 minutes</option>
+            <option value="180">3 minutes</option>
+        </select>
+        <span class="timer" id="timer">Time Left: 10s</span>
+    </div>
+
+    <div class="answer-box">
+        <button class="button" id="yes-btn">I Remember This</button>
+        <span id="yes-symbol" class="result-symbol" style="display: none;">✔️</span>
+        <button class="button" id="no-btn">I Don’t Remember This One</button>
+        <span id="no-symbol" class="result-symbol no-symbol" style="display: none;">❌</span>
+    </div>
+
+    <div class="results" id="results" style="display: none;">
+        Quiz Results: <span id="remembered-count">0</span> Remembered, <span id="not-remembered-count">0</span> Not Remembered.
+    </div>
+
+    <div class="visitor-counter" id="visitor-counter">
+        Visitors: <span id="visitor-count">0</span>
+    </div>
+
+    <div class="footer">
+        <button class="info-button">Made by AI and the students of 3rd clinical</button>
+        <p>اللهم اجعله نافعا لوجهك الكريم، صدقة جارية على اموات المسلمين</p>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById("file-input");
+        const quizImage = document.getElementById("quiz-image");
+        const timerDisplay = document.getElementById("timer");
+        const timerSelect = document.getElementById("timer-select");
+        const yesBtn = document.getElementById("yes-btn");
+        const noBtn = document.getElementById("no-btn");
+        const yesSymbol = document.getElementById("yes-symbol");
+        const noSymbol = document.getElementById("no-symbol");
+        const resultsDisplay = document.getElementById("results");
+        const rememberedCountDisplay = document.getElementById("remembered-count");
+        const notRememberedCountDisplay = document.getElementById("not-remembered-count");
+        const restartBtn = document.getElementById("restart-btn");
+        const visitorCountDisplay = document.getElementById("visitor-count");
+
+        let images = [];
+        let currentImageIndex = 0;
+        let timeLeft = 10; // Default timer duration
+        let timerInterval;
+        let rememberedCount = 0;
+        let notRememberedCount = 0;
+        let answered = false;
+
+        // Visitor counter logic
+        let visitorCount = localStorage.getItem('visitorCount') || 0;
+        visitorCount = parseInt(visitorCount) + 1;
+        localStorage.setItem('visitorCount', visitorCount);
+        visitorCountDisplay.innerText = visitorCount;
+
+        // Update the timer display when the dropdown selection changes
+        timerSelect.addEventListener("change", () => {
+            timeLeft = parseInt(timerSelect.value);
+            timerDisplay.innerText = `Time Left: ${formatTime(timeLeft)}`;
+        });
+
+        function shuffleImages() {
+            images = images.sort(() => Math.random() - 0.5);
+        }
+
+        function startQuiz() {
+            shuffleImages();
+            rememberedCount = 0;
+            notRememberedCount = 0;
+            rememberedCountDisplay.innerText = rememberedCount;
+            notRememberedCountDisplay.innerText = notRememberedCount;
+            currentImageIndex = 0;
+            loadImage();
+            startTimer();
+            resultsDisplay.style.display = "none";
+        }
+
+        function loadImage() {
+            quizImage.style.display = "block";
+            quizImage.src = URL.createObjectURL(images[currentImageIndex]);
+            resetSymbols();
+            answered = false;
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            timeLeft = parseInt(timerSelect.value); // Get selected timer duration
+            timerDisplay.innerText = `Time Left: ${formatTime(timeLeft)}`;
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerDisplay.innerText = `Time Left: ${formatTime(timeLeft)}`;
+                if (timeLeft <= 0) {
+                    countNotRemembered();
+                    nextImage();
+                }
+            }, 1000);
+        }
+
+        function formatTime(seconds) {
+            if (seconds >= 60) {
+                const minutes = Math.floor(seconds / 60);
+                const remainingSeconds = seconds % 60;
+                return `${minutes}m ${remainingSeconds}s`;
+            } else {
+                return `${seconds}s`;
+            }
+        }
+
+        function nextImage() {
+            clearInterval(timerInterval);
+            if (!answered) countRemembered();
+            if (currentImageIndex < images.length - 1) {
+                currentImageIndex++;
+                loadImage();
+                startTimer();
+            } else {
+                showResults();
+                alert(`You're done! Remembered: ${rememberedCount}, Not Remembered: ${notRememberedCount}`);
+            }
+        }
+
+        function prevImage() {
+            clearInterval(timerInterval);
+            currentImageIndex = (currentImageIndex - 1 + images.length) % images.length;
+            loadImage();
+            startTimer();
+        }
+
+        function trackAnswer(remembered) {
+            if (!answered) {
+                if (remembered) countRemembered();
+                else countNotRemembered();
+                answered = true;
+            }
+        }
+
+        function countRemembered() {
+            rememberedCount++;
+            rememberedCountDisplay.innerText = rememberedCount;
+            yesSymbol.style.display = "inline";
+            noSymbol.style.display = "none";
+        }
+
+        function countNotRemembered() {
+            notRememberedCount++;
+            notRememberedCountDisplay.innerText = notRememberedCount;
+            yesSymbol.style.display = "none";
+            noSymbol.style.display = "inline";
+        }
+
+        function resetSymbols() {
+            yesSymbol.style.display = "none";
+            noSymbol.style.display = "none";
+        }
+
+        function showResults() {
+            resultsDisplay.style.display = "block";
+        }
+
+        fileInput.addEventListener("change", () => {
+            images = Array.from(fileInput.files).slice(0, 100);
+            startQuiz();
+        });
+
+        document.getElementById("next-btn").addEventListener("click", nextImage);
+        document.getElementById("prev-btn").addEventListener("click", prevImage);
+        restartBtn.addEventListener("click", startQuiz);
+        yesBtn.addEventListener("click", () => trackAnswer(true));
+        noBtn.addEventListener("click", () => trackAnswer(false));
+    </script>
+
+</body>
+</html>
